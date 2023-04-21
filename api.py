@@ -44,8 +44,10 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    manager_id = db.Column(db.Integer, nullable=True)
+    manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     role_id = db.Column(db.Integer, nullable=False)
+    subordinates = db.relationship('User', backref=db.backref('manager', remote_side=[id]))
+
     # manager = db.relationship('manager', backref = 'users', lazy=True)
     # role = db.relationship('roles', backref = 'users', lazy=True)
 
@@ -164,7 +166,7 @@ def show_details(user_no):
 
     if Roles_dict[user_detail.role_id] != 'employee':
         if Roles_dict[user_req.role_id] == 'manager':
-            managers = User.query.filter_by(manager_id=user_req.id).all()
+            managers = User.subordinates
             for manager in managers:
                 user_name={}
                 user_name['username'] = manager.username 
